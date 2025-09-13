@@ -1,0 +1,23 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme static {
+  --font-sans: 'Raleway', sans-serif;
+	--ui-secondary: #b0b0b0;
+}
+
+:root {
+  --ui-primary: oklch(62.17% 0.174 252.17);
+  --ui-secondary: oklch(72.80% 0.206 322.12);
+  --ui-bg: oklch(98.32% 0.007 247.89);
+  --ui-text: oklch(18.05% 0.037 245.15);
+  --accent: oklch(80.12% 0.144 65.08);
+}
+
+.dark {
+  --ui-primary: oklch(59.16% 0.174 252.93);
+  --ui-secondary: oklch(42.60% 0.194 321.41);
+  --ui-bg: oklch(10.96% 0.018 236.44);
+  --ui-text: oklch(94.14% 0.026 244.43);
+  --accent: oklch(56.51% 0.138 55.94);
+}
