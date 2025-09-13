@@ -1,9 +1,17 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 import tempfile, shutil, os
-from utils.gcp import GCSClient
+from backend.utils.gcp import GCSClient
+from dotenv import load_dotenv
 
+load_dotenv()
 router = APIRouter()
-gcs = GCSClient()
+
+from functools import lru_cache
+from backend.utils.gcp import GCSClient
+
+@lru_cache(maxsize=1)
+def get_gcs() -> GCSClient:
+    return GCSClient()
 
 def _save_temp(upload: UploadFile) -> str:
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=f"_{upload.filename}")
@@ -16,8 +24,8 @@ async def upload_ppt(file: UploadFile = File(...)):
     path = _save_temp(file)
     try:
         blob = f"ppt/{file.filename}"
-        gcs.upload_file(path, blob)
-        url = gcs.generate_signed_url(blob, expiration=3600)
+        get_gcs().upload_file(path, blob)
+        url = get_gcs().generate_signed_url(blob, expiration=3600)
         return {"ok": True, "url": url, "blob": blob}
     finally:
         os.unlink(path)
@@ -27,8 +35,8 @@ async def upload_face(file: UploadFile = File(...)):
     path = _save_temp(file)
     try:
         blob = f"face/{file.filename}"
-        gcs.upload_file(path, blob)
-        url = gcs.generate_signed_url(blob, expiration=3600)
+        get_gcs().upload_file(path, blob)
+        url = get_gcs().generate_signed_url(blob, expiration=3600)
         return {"ok": True, "url": url, "blob": blob}
     finally:
         os.unlink(path)
@@ -38,8 +46,8 @@ async def upload_voice(file: UploadFile = File(...)):
     path = _save_temp(file)
     try:
         blob = f"voice/{file.filename}"
-        gcs.upload_file(path, blob)
-        url = gcs.generate_signed_url(blob, expiration=3600)
+        get_gcs().upload_file(path, blob)
+        url = get_gcs().generate_signed_url(blob, expiration=3600)
         return {"ok": True, "url": url, "blob": blob}
     finally:
         os.unlink(path)

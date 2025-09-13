@@ -19,7 +19,11 @@ python obs_control.py
 cd Hack-the-Stage/backend_new
 python heygenAPI.py
 ```
-##
+
+## Smoke Tests
+
+Quickly verify that the **Cohere API key** and **Google Cloud Storage credentials** are working (upload, list, signed URL).
+
 ```bash
 cd Hack-the-Stage
 python -m backend.tools.smoke_tests
@@ -33,4 +37,10 @@ python -m backend.tools.smoke_tests --gcpconf
 ```bash
 pnpm i
 pnpm run dev
+```
+## Speech to Text 
+```bash
+cd Hack-the-Stage
+uvicorn backend.main:app --reload 
+curl -X POST http://127.0.0.1:8000/dev/local-audio-to-text
 ```
