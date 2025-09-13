@@ -1,13 +1,21 @@
 from pptx import Presentation
 from PyPDF2 import PdfReader
-from generate_speech import generate_speech
+from coherex import generate_speech
+from gcp import GCSClient 
+import io
+import time
 
 class PPTProcessor:
     def __init__(self):
+        self.gcs = GCSClient()
         pass
 
     def extract_ppt_text(self, ppt_path):
-        prs = Presentation(ppt_path)
+        bucket_name = "hack-the-north-bucket"
+        blob = self.gcs.client.bucket(bucket_name).blob(ppt_path)
+        data = blob.download_as_bytes()
+        
+        prs = Presentation(io.BytesIO(data))    # 用 BytesIO 包装成 file-like object
         slides_text = []
         
         for i, slide in enumerate(prs.slides, start=1):
@@ -16,8 +24,11 @@ class PPTProcessor:
                 if hasattr(shape, "text") and shape.text.strip():
                     slide_content.append(shape.text.strip())
             if slide_content:
-                slides_text.append(f"Slide {i}: " + " | ".join(slide_content))
-        return "\n".join(slides_text)
+                slides_text.append({
+                    "page_num": i,
+                    "text": "\n".join(slide_content)
+                })
+        return slides_text
     
     def extract_pdf_text(self, pdf_path):
         text = []
@@ -26,33 +37,43 @@ class PPTProcessor:
             for i, page in enumerate(reader.pages, start=1):
                 content = page.extract_text()
                 if content and content.strip():
-                    text.append(f"Page {i}: {content.strip()}")
-        return "\n".join(text)
+                    text.append({
+                        "page_num": i,
+                        "text": content.strip()
+                    })
+        return text
 
     def build_prompt(self, ppt_text):
         """
         Build the prompt send to cohere api based on the extracted text
         """
         prompt = (
-            "Please rewrite the following PPT or PDF outline into a speech draft。\n\n"
-            f"{ppt_text}\n\n"
-            "Please output the complete speech draft. Don't just summarize。"
+            f"Use English to generate a speech draft for Slide/Page {ppt_text['page_num']}.\n\n"
+            f"Content:\n{ppt_text['text']}\n\n"
+            "Please output a clear and complete speech text for this slide/page. "
+            "Do not summarize, make it ready to speak."
         )
         return prompt
-
-
-
-"""
-Usage:
-    ppt_processor = file_to_speech.PPTProcessor()
-
-    ppt_path = "./test.pptx"
-    pdf_path = "./test.pdf"
-
-    ppt_text = ppt_processor.extract_ppt_text(ppt_path)
-    pdf_text = ppt_processor.extract_pdf_text(pdf_path)
     
-    prompt = ppt_processor.build_prompt(pdf_text)
+    def file_to_speech(self, file_path: str) -> dict:
+        if file_path.endswith(".pptx"):
+            pages = self.extract_ppt_text(file_path)
+        elif file_path.endswith(".pdf"):
+            pages = self.extract_pdf_text(file_path)
+        else:
+            raise ValueError("Unsupported file format: Only .pptx and .pdf are supported")
 
-    speech_text = generate_speech(prompt)
-"""
+        result = {}
+        for page in pages:
+            print(f"Processing Page {page['page_num']}...")
+            prompt = self.build_prompt(page)
+            speech_text = generate_speech(prompt)
+            result[page["page_num"]] = speech_text
+            time.sleep(7)
+
+        return result
+    
+    # Usage: 
+    # ppt_processor = file_to_speech.PPTProcessor()
+    # file_path = "ppt/DeGLI_summary.pptx"
+    # speech_text = ppt_processor.file_to_speech(file_path)
