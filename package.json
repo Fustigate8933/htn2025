@@ -4,7 +4,11 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+
+		"dev": "concurrently \"pnpm frontend\" \"pnpm backend\"",
+    "frontend": "nuxt dev",
+    "backend": "cd backend && uvicorn main:app --reload --host 0.0.0.0 --port 8000",
+
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
@@ -22,6 +26,7 @@
     "@nuxt/eslint": "^1.9.0",
     "@nuxt/test-utils": "^3.19.2",
     "@vue/test-utils": "^2.4.6",
+    "concurrently": "^9.2.0",
     "eslint": "^9.33.0",
     "happy-dom": "^18.0.1",
     "playwright-core": "^1.55.0",
