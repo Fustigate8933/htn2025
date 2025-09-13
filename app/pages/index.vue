@@ -1,74 +1,119 @@
 <template>
-	<div id="index-wrapper" class="flex flex-col items-center gap-10">
-		<h1 class="font-bold text-4xl text-(--ui-primary)">
-			Hack the stage
-		</h1>
+  <LoadingScreen v-if="isLoading" />
 
-		<p class="text-lg max-w-3xl text-center">
-			Transform your slide deck/powerpoint presentations with AI avatars. Upload your slides, face, and voice to create personalized presentation videos.
-		</p>
+  <div v-else class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="container mx-auto px-4 py-8">
+      <WorkflowHeader />
+      
+      <ProgressIndicator 
+        :steps="workflowSteps" 
+        :current-step="currentStep" 
+      />
 
-		<div class="flex gap-10 w-full">
-			<UCard variant="outline">
-				<template #header>
-					<div class="flex gap-4 items-center">
-						<UIcon name="file-icons:microsoft-powerpoint" class="size-5 text-[var(--accent)]" />
-						<h1 class="font-bold text-lg">Slide deck</h1>
-					</div>
-					<p>Your slide deck</p>
-				</template>
-				<div class="flex flex-col gap-2">
-					<UFileUpload
-						v-model="pptFile"
-						class="w-62 h-90 hover:cursor-pointer"
-						label="Drop your file here"
-						description=".PPTX (Max 2MB)"
-						:highlight="true"
-					/>
-				</div>
-			</UCard>
-			<UCard variant="outline">
-				<template #header>
-					<div class="flex gap-4 items-center">
-						<UIcon name="iconoir:face-id" class="size-5 text-[var(--accent)]" />
-						<h1 class="font-bold text-lg">Face image</h1>
-					</div>
-					<p>Clear photo of your face</p>
-				</template>
-				<div class="flex flex-col gap-2 w-full">
-					<UFileUpload
-						v-model="faceFile"
-						class="w-62 h-90 hover:cursor-pointer"
-						label="Drop your file here"
-						description=".PNG, .JPG, .JPEG (Max 2MB)"
-						:highlight="true"
-					/>
-				</div>
-			</UCard>
-			<UCard variant="outline">
-				<template #header>
-					<div class="flex gap-4 items-center">
-						<UIcon name="ic:outline-record-voice-over" class="size-5 text-[var(--accent)]" />
-						<h1 class="font-bold text-lg">Voice sample</h1>
-					</div>
-					<p>Audio file for your voice</p>
-				</template>
-				<div class="flex flex-col gap-2">
-					<UFileUpload
-						v-model="audioFile"
-						class="w-62 h-90 hover:cursor-pointer"
-						label="Drop your file here"
-						description=".WAV (Max 2MB)"
-						:highlight="true"
-					/>
-				</div>
-			</UCard>
-		</div>
-	</div>
+      <div class="mb-8">
+        <UploadStep
+          v-if="currentStep === 0"
+          v-model:upload-data="uploadData"
+          :upload-status="uploadStatus"
+          :can-proceed="canProceedToNextStep"
+          :is-processing="isProcessing"
+          @next="nextStep"
+          @upload="handleFileUpload"
+        />
+
+        <GenerateStep
+          v-if="currentStep === 1"
+          v-model:generation-options="generationOptions"
+          :generation-progress="generationProgress"
+          :generation-results="generationResults"
+          :is-generating="isGenerating"
+          :overall-progress="overallProgress"
+          :error="error"
+          @previous="previousStep"
+          @next="nextStep"
+          @retry="generateContent"
+        />
+
+        <PreviewStep
+          v-if="currentStep === 2"
+          v-model:presentation-settings="presentationSettings"
+          :is-presenting="isPresenting"
+          :is-connecting-camera="isConnectingCamera"
+          :has-camera-access="hasCameraAccess"
+          @previous="previousStep"
+          @start-presentation="startPresentation"
+          @toggle-presentation="togglePresentation"
+          @switch-to-human="switchToHuman"
+          @switch-to-avatar="switchToAvatar"
+          @connect-camera="connectCamera"
+          @test-camera="testCamera"
+        />
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-const pptFile = ref(null)
-const faceFile = ref(null)
-const audioFile = ref(null)
+import LoadingScreen from '~/components/LoadingScreen.vue'
+import WorkflowHeader from '~/components/WorkflowHeader.vue'
+import ProgressIndicator from '~/components/ProgressIndicator.vue'
+import UploadStep from '~/components/UploadStep.vue'
+import GenerateStep from '~/components/GenerateStep.vue'
+import PreviewStep from '~/components/PreviewStep.vue'
+
+import { useWorkflow } from '~/composables/useWorkflow'
+
+const {
+  currentStep,
+  isLoading,
+  isProcessing,
+  isGenerating,
+  isPresenting,
+  error,
+  isConnectingCamera,
+  hasCameraAccess,
+  uploadData,
+  uploadStatus,
+  generationOptions,
+  generationProgress,
+  generationResults,
+  presentationSettings,
+  workflowSteps,
+  
+  canProceedToNextStep,
+  overallProgress,
+  
+  handleFileUpload,
+  nextStep,
+  previousStep,
+  generateContent,
+  togglePresentation,
+  switchToHuman,
+  switchToAvatar,
+  connectCamera,
+  testCamera,
+  startPresentation,
+  restoreState
+} = useWorkflow()
+
+onMounted(() => {
+  setTimeout(() => {
+    isLoading.value = false
+    
+    const route = useRoute()
+    const stepParam = route.query.step
+    if (stepParam && typeof stepParam === 'string') {
+      const stepNumber = parseInt(stepParam)
+      if (stepNumber >= 0 && stepNumber <= 2) {
+        restoreState(stepNumber)
+      }
+    }
+  }, 1500)
+})
+
+watch(currentStep, (newStep) => {
+  if (newStep === 1) {
+    generateContent()
+  }
+})
 </script>

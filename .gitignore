@@ -22,3 +22,9 @@ logs
 .env
 .env.*
 !.env.example
+
+backend/hackthenorth-470120-d6713c66118f.json
+__pycache__/
+**/__pycache__/
+*.pyc
+

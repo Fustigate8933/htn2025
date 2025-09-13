@@ -1,7 +1,7 @@
 import os
 from flask import Flask 
 from coherex import generate_speech
-from backend.utils.gcp import GCSClient
+from utils.gcp import GCSClient
 from dotenv import load_dotenv
 
 load_dotenv()

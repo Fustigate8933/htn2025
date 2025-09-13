@@ -1,6 +1,6 @@
 from typing import List
 from google.cloud import speech
-from backend.utils.audio_preprocess import to_linear16_wav_file  # 如果你的工具在 utils/audio_io.py
+from utils.audio_preprocess import to_linear16_wav_file  # 如果你的工具在 utils/audio_io.py
 
 class ASRService:
     def __init__(self):

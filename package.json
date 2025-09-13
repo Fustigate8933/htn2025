@@ -7,8 +7,7 @@
 
 	"dev": "concurrently \"pnpm frontend\" \"pnpm backend\"",
     "frontend": "nuxt dev",
-    "backend": "cd backend && uvicorn main:app --reload --host 0.0.0.0 --port 8000",
-
+		"backend": "cd backend && PYTHONPATH=. uvicorn main:app --reload --host 0.0.0.0 --port 8000",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",

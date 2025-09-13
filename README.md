@@ -40,7 +40,7 @@ pnpm run dev
 ```
 ## Speech to Text 
 ```bash
-cd Hack-the-Stage
-uvicorn backend.main:app --reload 
+cd Hack-the-Stage/backend
+uvicorn main:app --reload 
 curl -X POST http://127.0.0.1:8000/dev/local-audio-to-text
 ```

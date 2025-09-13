@@ -6,3 +6,9 @@ google-auth==2.40.3
 google-cloud-speech==2.33.0
 soundfile==0.13.1
 librosa==0.11.0
+cohere==5.17.0
+python-pptx==0.6.23
+spire.presentation==8.12.0
+PyPDF2==3.0.1
+python-multipart==0.0.9
+Pillow==10.0.0

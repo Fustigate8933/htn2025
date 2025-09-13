@@ -1,13 +1,13 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 import tempfile, shutil, os
-from backend.utils.gcp import GCSClient
+from utils.gcp import GCSClient
 from dotenv import load_dotenv
 
 load_dotenv()
 router = APIRouter()
 
 from functools import lru_cache
-from backend.utils.gcp import GCSClient
+from utils.gcp import GCSClient
 
 @lru_cache(maxsize=1)
 def get_gcs() -> GCSClient:
@@ -21,6 +21,7 @@ def _save_temp(upload: UploadFile) -> str:
 
 @router.post("/ppt")
 async def upload_ppt(file: UploadFile = File(...)):
+    print("uploading ppt")
     path = _save_temp(file)
     try:
         blob = f"ppt/{file.filename}"

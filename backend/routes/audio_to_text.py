@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
-from backend.services.asr import ASRService
-from backend.utils.gcp import GCSClient
-from backend.utils.audio_preprocess import to_linear16_wav_file
+from services.asr import ASRService
+from utils.gcp import GCSClient
+from utils.audio_preprocess import to_linear16_wav_file
 import uuid, os, soundfile as sf
 
 router = APIRouter()
