@@ -148,14 +148,17 @@ import { useAudioRecording } from '~/composables/useAudioRecording'
 
 // Props
 interface Props {
-  onResponseGenerated?: (question: string, response: string) => void
   pptUrl?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  onResponseGenerated: () => {},
   pptUrl: ''
 })
+
+// Emits
+const emit = defineEmits<{
+  responseGenerated: [question: string, response: string]
+}>()
 
 // Composables
 const recorder = useAudioRecording(props.pptUrl)
@@ -191,8 +194,8 @@ const stopRecording = async () => {
 const processRecording = async () => {
   const result = await recorder.processAudio()
   if (result) {
-    // Call the callback with both transcript and response
-    props.onResponseGenerated?.(result.transcript, result.response)
+    // Emit the event with both transcript and response
+    emit('responseGenerated', result.transcript, result.response)
   }
 }
 
