@@ -67,8 +67,9 @@
       </div>
       
       <!-- Question Recording Panel -->
-      <div v-if="showRecordingPanel" class="absolute bottom-4 right-4 max-w-sm">
+      <div v-if="showRecordingPanel" class="absolute bottom-4 left-4 max-w-sm">
         <QuestionRecording 
+					class="mb-[4rem]"
           @response-generated="onQuestionResponse"
         />
       </div>

@@ -56,15 +56,6 @@
           class="audio-player"
         />
         <UButton
-          @click="processRecording"
-          :loading="recorder.isProcessing.value"
-          variant="outline"
-          size="sm"
-        >
-          <UIcon name="ic:outline-transcribe" class="mr-2" />
-          Retry Processing
-        </UButton>
-        <UButton
           @click="clearRecording"
           variant="ghost"
           size="sm"
@@ -118,6 +109,15 @@
         >
           <UIcon name="ic:outline-volume-up" class="mr-2" />
           Speak Response
+        </UButton>
+        <UButton
+          @click="processRecording"
+          :loading="recorder.isProcessing.value"
+          variant="outline"
+          size="sm"
+        >
+          <UIcon name="ic:outline-transcribe" class="mr-2" />
+          Retry Processing
         </UButton>
         <UButton
           @click="clearRecording"
@@ -403,8 +403,10 @@ onMounted(() => {
 
 .action-buttons {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 16px;
+  align-items: center;
 }
 
 .error-display {
