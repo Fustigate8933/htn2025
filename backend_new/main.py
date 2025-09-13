@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 
+=======
+import os
+>>>>>>> b6393c5 (gcp and cohere packing)
 from flask import Flask 
 from coherex import generate_speech
 from gcp import GCSClient
@@ -104,4 +108,11 @@ def test_json_and_id():
 if __name__ == "__main__":
     
     #test_gcs_basic()
+<<<<<<< HEAD
     test_json_and_id()
+=======
+    test_json_and_id()
+    
+
+
+>>>>>>> b6393c5 (gcp and cohere packing)
