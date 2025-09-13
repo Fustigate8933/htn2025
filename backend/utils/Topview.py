@@ -118,7 +118,8 @@ def query_video_task(task_id: str, interval=5, max_tries=12000) -> str:
     raise TimeoutError("video task not finished")
 
 
-def gen_video(video_path: str, tts_text: str)
+def gen_video(video_path: str, tts_text: str) -> str:
+    """Generate a single video with the given text"""
     video_file_id = upload_video(video_path)
 
     avatar_task_id = submit_video2avatar(video_file_id)
@@ -131,3 +132,83 @@ def gen_video(video_path: str, tts_text: str)
     print("Submitted video task, taskId =", video_task_id)
     output_url = query_video_task(video_task_id)
     print("Final video URL:", output_url)
+    return output_url
+
+def gen_video_batch_simple(audio_path: str, video_path: str, texts: list) -> list:
+    """
+    Generate multiple videos with the same audio and video but different text content
+    Simplified version that returns only video URLs
+    """
+    print(f"Starting batch generation for {len(texts)} videos")
+    
+    # First, create the avatar from the video
+    video_file_id = upload_video(video_path)
+    avatar_task_id = submit_video2avatar(video_file_id)
+    print("Submitted video2aiAvatar, taskId =", avatar_task_id)
+    ai_avatar_id = query_video2avatar(avatar_task_id)
+    print("Got aiAvatarId =", ai_avatar_id)
+    
+    # Generate videos for each text
+    video_urls = []
+    for i, text in enumerate(texts):
+        try:
+            print(f"Generating video {i+1}/{len(texts)}: {text[:50]}...")
+            video_task_id = submit_video_task(ai_avatar_id, text)
+            output_url = query_video_task(video_task_id)
+            video_urls.append(output_url)
+            print(f"Video {i+1} completed: {output_url}")
+        except Exception as e:
+            print(f"Failed to generate video {i+1}: {e}")
+            video_urls.append(None)
+    
+    print(f"Batch generation completed. {len([url for url in video_urls if url])} videos generated successfully")
+    return video_urls
+
+def gen_video_batch(audio_path: str, video_path: str, texts: list, max_workers: int = 3, notice_url: str = None) -> dict:
+    """
+    Generate multiple videos with the same audio and video but different text content
+    Full version with detailed results and error handling
+    """
+    print(f"Starting batch generation for {len(texts)} videos with {max_workers} workers")
+    
+    # First, create the avatar from the video
+    video_file_id = upload_video(video_path)
+    avatar_task_id = submit_video2avatar(video_file_id)
+    print("Submitted video2aiAvatar, taskId =", avatar_task_id)
+    ai_avatar_id = query_video2avatar(avatar_task_id)
+    print("Got aiAvatarId =", ai_avatar_id)
+    
+    # Generate videos for each text
+    video_urls = []
+    errors = []
+    
+    for i, text in enumerate(texts):
+        try:
+            print(f"Generating video {i+1}/{len(texts)}: {text[:50]}...")
+            video_task_id = submit_video_task(ai_avatar_id, text, notice_url)
+            output_url = query_video_task(video_task_id)
+            video_urls.append(output_url)
+            print(f"Video {i+1} completed: {output_url}")
+        except Exception as e:
+            print(f"Failed to generate video {i+1}: {e}")
+            video_urls.append(None)
+            errors.append({
+                "index": i,
+                "text": text,
+                "error": str(e)
+            })
+    
+    successful_videos = [url for url in video_urls if url is not None]
+    
+    result = {
+        "total_videos": len(texts),
+        "successful_videos": len(successful_videos),
+        "failed_videos": len(errors),
+        "video_urls": video_urls
+    }
+    
+    if errors:
+        result["errors"] = errors
+    
+    print(f"Batch generation completed. {len(successful_videos)} videos generated successfully")
+    return result

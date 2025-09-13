@@ -29,14 +29,16 @@
         
         <!-- Avatar Video Overlay -->
         <div 
-          v-if="currentMode === 'avatar' && currentVideoUrl"
+          v-if="currentMode === 'avatar'"
           :class="[
             'absolute transition-all duration-300 ease-in-out',
             getAvatarPosition()
           ]"
           :style="{ width: `${avatarSize}%`, height: `${avatarSize * 0.75}%` }"
         >
+          <!-- Video Player -->
           <video 
+            v-if="currentVideoUrl"
             ref="avatarVideo"
             :src="currentVideoUrl"
             class="w-full h-full object-cover rounded-lg shadow-2xl"
@@ -45,6 +47,19 @@
             :muted="false"
             @ended="onVideoEnd"
           />
+          
+          <!-- Video Not Available Placeholder -->
+          <div 
+            v-else
+            class="w-full h-full bg-gray-800 rounded-lg shadow-2xl flex items-center justify-center border-2 border-dashed border-gray-600"
+          >
+            <div class="text-center text-white p-4">
+              <UIcon name="line-md:loading-loop" class="size-8 mx-auto mb-2 text-blue-400 animate-spin" />
+              <p class="text-sm text-gray-300">Avatar video</p>
+              <p class="text-xs text-gray-400">generating in background...</p>
+              <p class="text-xs text-gray-500 mt-1">This may take 2-5 minutes</p>
+            </div>
+          </div>
         </div>
         
         <!-- Human Camera Overlay -->
@@ -363,7 +378,19 @@ const previousSlide = () => {
 
 const loadCurrentVideo = () => {
   if (presentationData.value?.videoUrls && presentationData.value.videoUrls[currentSlideIndex.value]) {
-    currentVideoUrl.value = presentationData.value.videoUrls[currentSlideIndex.value]
+    const videoUrl = presentationData.value.videoUrls[currentSlideIndex.value]
+    // Handle both placeholder URLs and actual video URLs
+    if (videoUrl && videoUrl !== null && !videoUrl.startsWith('/api/generated/')) {
+      // This is a real video URL from the batch generation (TopView URLs)
+      currentVideoUrl.value = videoUrl
+      console.log(`Loading video for slide ${currentSlideIndex.value + 1}: ${videoUrl}`)
+    } else {
+      // This is a placeholder URL or null, we'll show a message or handle it differently
+      currentVideoUrl.value = ''
+      console.log(`Video for slide ${currentSlideIndex.value + 1} is not yet available or still generating`)
+    }
+  } else {
+    currentVideoUrl.value = ''
   }
 }
 

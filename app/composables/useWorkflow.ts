@@ -164,6 +164,11 @@ export const useWorkflow = () => {
     isGenerating.value = true
     error.value = null
     
+    // Request notification permission for video completion alerts
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+      await Notification.requestPermission()
+    }
+    
     try {
       console.log('Starting presentation generation with files:', {
         ppt: uploadedFiles.value.ppt.blob,
@@ -181,44 +186,8 @@ export const useWorkflow = () => {
         throw new Error('Backend server is not running. Please start the backend server first.')
       }
       
-      // First, try simple PPT processing to get actual slides
-      console.log('Processing PPT file to extract slides...')
-      console.log('PPT blob value:', uploadedFiles.value.ppt.blob)
-      console.log('PPT URL value:', uploadedFiles.value.ppt.url)
-      console.log('PPT blob type:', typeof uploadedFiles.value.ppt.blob)
-      
-      const pptResponse = await $fetch('/api/simple/process-ppt', {
-        method: 'POST',
-        body: {
-          ppt_blob: uploadedFiles.value.ppt.blob,
-          ppt_url: uploadedFiles.value.ppt.url
-        }
-      })
-      
-      console.log('PPT processing response:', pptResponse)
-      
-      if (pptResponse.success) {
-        // Use the actual slides from the PPT file
-        generationResults.value = {
-          script: `Welcome to our presentation. We have ${pptResponse.total_slides} slides to cover today.`,
-          slides: pptResponse.slides,
-          videoUrls: pptResponse.slides.map((_: any, index: number) => `/api/generated/slide-${index + 1}-video.mp4`)
-        }
-        
-        // Mark all progress as complete
-        generationProgress.value = {
-          slides: true,
-          script: true,
-          voice: true,
-          avatar: true
-        }
-        
-        isGenerating.value = false
-        console.log('PPT processed successfully:', generationResults.value)
-        return
-      }
-      
-      // If simple processing fails, try the full generation
+      // Generate complete presentation with real avatar videos
+      console.log('Generating complete presentation with avatar videos...')
       const response = await $fetch('/api/generate/presentation', {
         method: 'POST',
         body: {
@@ -238,10 +207,10 @@ export const useWorkflow = () => {
         generationResults.value = {
           script: response.presentation.scripts.join('\n\n'),
           slides: response.presentation.slides,
-          videoUrls: response.presentation.video_urls
+          videoUrls: response.presentation.video_urls,
+          pptUrl: uploadedFiles.value.ppt.url
         }
         
-        // Mark all progress as complete
         generationProgress.value = {
           slides: true,
           script: true,
@@ -254,15 +223,14 @@ export const useWorkflow = () => {
       } else {
         throw new Error('Generation failed')
       }
+      
     } catch (err) {
       console.error('Generation error:', err)
       console.error('Full error details:', err)
       
-      // Don't fall back to mock data - let the user know there's an issue
       isGenerating.value = false
       error.value = `Failed to generate presentation: ${err.message || 'Unknown error'}`
       
-      // Show error in UI
       console.error('Presentation generation failed. Check backend logs and API connectivity.')
     }
   }
