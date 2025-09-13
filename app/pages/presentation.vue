@@ -70,6 +70,7 @@
       <div v-if="showRecordingPanel" class="absolute bottom-4 left-4 max-w-sm">
         <QuestionRecording 
 					class="mb-[4rem]"
+          :ppt-url="presentationData?.pptUrl || ''"
           @response-generated="onQuestionResponse"
         />
       </div>
@@ -200,9 +201,6 @@
                     Camera Connected
                   </span>
                   <span class="text-gray-400">
-                    Press ESC to return to preview
-                  </span>
-                  <span class="text-gray-400">
                     Press R to toggle recording panel
                   </span>
                 </div>
@@ -256,6 +254,7 @@ interface PresentationData {
   slides: Slide[]
   videoUrls: string[]
   script: string
+  pptUrl?: string
 }
 
 // Use shared camera state
@@ -457,9 +456,6 @@ const onQuestionResponse = (question: string, response: string) => {
 // Keyboard shortcuts
 const handleKeydown = (event: KeyboardEvent) => {
   switch (event.key) {
-    case 'Escape':
-      navigateTo('/?step=2')
-      break
     case ' ':
       event.preventDefault()
       togglePlayback()

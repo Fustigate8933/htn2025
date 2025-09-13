@@ -45,20 +45,20 @@
         <UCard variant="outline" class="h-full">
           <template #header>
             <div class="flex gap-3 items-center">
-              <UIcon name="iconoir:face-id" class="size-6 text-blue-500" />
-              <h3 class="font-bold text-lg">Face Image</h3>
+              <UIcon name="ic:outline-videocam" class="size-6 text-blue-500" />
+              <h3 class="font-bold text-lg">Face Video</h3>
             </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Clear photo of your face</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Short video of your face</p>
           </template>
           <div class="flex flex-col gap-3">
             <UFileUpload
               v-model="uploadData.faceFile"
               class="w-full h-50 hover:cursor-pointer"
-              label="Drop your image here"
-              description=".PNG, .JPG, .JPEG (Max 5MB)"
+              label="Drop your video here"
+              description=".MP4, .MOV, .AVI (Max 50MB)"
               :highlight="true"
               color="secondary"
-              accept=".png,.jpg,.jpeg"
+              accept=".mp4,.mov,.avi"
               @change="handleFileUpload('face')"
             />
             <div v-if="uploadStatus.face" class="text-sm">

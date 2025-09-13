@@ -155,9 +155,9 @@
         <UButton 
           color="primary" 
           :disabled="!generationResults"
-          @click="$emit('next')"
+          @click="$emit('startPresentation')"
         >
-          Next: Preview & Present
+          Start Presentation
         </UButton>
       </div>
     </div>
@@ -198,6 +198,7 @@ interface Emits {
   (e: 'previous'): void
   (e: 'next'): void
   (e: 'retry'): void
+  (e: 'startPresentation'): void
   (e: 'update:generationOptions', value: GenerationOptions): void
 }
 

@@ -32,21 +32,7 @@
           @previous="previousStep"
           @next="nextStep"
           @retry="generateContent"
-        />
-
-        <PreviewStep
-          v-if="currentStep === 2"
-          v-model:presentation-settings="presentationSettings"
-          :is-presenting="isPresenting"
-          :is-connecting-camera="isConnectingCamera"
-          :has-camera-access="hasCameraAccess"
-          @previous="previousStep"
           @start-presentation="startPresentation"
-          @toggle-presentation="togglePresentation"
-          @switch-to-human="switchToHuman"
-          @switch-to-avatar="switchToAvatar"
-          @connect-camera="connectCamera"
-          @test-camera="testCamera"
         />
       </div>
     </div>
@@ -59,7 +45,6 @@ import WorkflowHeader from '~/components/WorkflowHeader.vue'
 import ProgressIndicator from '~/components/ProgressIndicator.vue'
 import UploadStep from '~/components/UploadStep.vue'
 import GenerateStep from '~/components/GenerateStep.vue'
-import PreviewStep from '~/components/PreviewStep.vue'
 
 import { useWorkflow } from '~/composables/useWorkflow'
 
@@ -104,7 +89,7 @@ onMounted(() => {
     const stepParam = route.query.step
     if (stepParam && typeof stepParam === 'string') {
       const stepNumber = parseInt(stepParam)
-      if (stepNumber >= 0 && stepNumber <= 2) {
+      if (stepNumber >= 0 && stepNumber <= 1) {
         restoreState(stepNumber)
       }
     }

@@ -1,6 +1,6 @@
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const { ppt_blob } = body
+  const { ppt_blob, ppt_url } = body
 
   if (!ppt_blob) {
     throw createError({
@@ -14,7 +14,10 @@ export default defineEventHandler(async (event) => {
 
     const response = await $fetch(backendUrl, {
       method: "POST",
-      body: { ppt_blob }
+      body: { 
+        ppt_blob,
+        ppt_url 
+      }
     })
 
     return response

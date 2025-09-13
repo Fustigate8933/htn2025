@@ -20,10 +20,19 @@ export default defineEventHandler(async (event) => {
       })
     }
     
+    // Find the PPT URL in the form data
+    const pptUrlField = formData.find(field => field.name === 'ppt_url')
+    const pptUrl = pptUrlField ? pptUrlField.data.toString() : null
+    
     // Create FormData to forward to backend
     const backendFormData = new FormData()
     const audioBlob = new Blob([audioFile.data], { type: audioFile.type || 'audio/webm' })
     backendFormData.append('audio', audioBlob, 'question.webm')
+    
+    // Add PPT URL if available
+    if (pptUrl) {
+      backendFormData.append('ppt_url', pptUrl)
+    }
     
     // Forward to backend for processing
     const backendUrl = 'http://localhost:8000/questions/audio-to-text'

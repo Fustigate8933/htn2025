@@ -98,8 +98,7 @@ export const useWorkflow = () => {
 
   const workflowSteps: WorkflowStep[] = [
     { id: 'upload', title: 'Upload Materials' },
-    { id: 'generate', title: 'Generate Content' },
-    { id: 'present', title: 'Preview & Present' }
+    { id: 'generate', title: 'Generate Content' }
   ]
 
   // Computed
@@ -185,12 +184,14 @@ export const useWorkflow = () => {
       // First, try simple PPT processing to get actual slides
       console.log('Processing PPT file to extract slides...')
       console.log('PPT blob value:', uploadedFiles.value.ppt.blob)
+      console.log('PPT URL value:', uploadedFiles.value.ppt.url)
       console.log('PPT blob type:', typeof uploadedFiles.value.ppt.blob)
       
       const pptResponse = await $fetch('/api/simple/process-ppt', {
         method: 'POST',
         body: {
-          ppt_blob: uploadedFiles.value.ppt.blob
+          ppt_blob: uploadedFiles.value.ppt.blob,
+          ppt_url: uploadedFiles.value.ppt.url
         }
       })
       
@@ -222,8 +223,11 @@ export const useWorkflow = () => {
         method: 'POST',
         body: {
           ppt_blob: uploadedFiles.value.ppt.blob,
+          ppt_url: uploadedFiles.value.ppt.url,
           face_blob: uploadedFiles.value.face.blob,
+          face_url: uploadedFiles.value.face.url,
           voice_blob: uploadedFiles.value.voice.blob,
+          voice_url: uploadedFiles.value.voice.url,
           style: generationOptions.value.style
         }
       })
@@ -289,8 +293,12 @@ export const useWorkflow = () => {
     // Pass the generation results to the presentation page
     if (generationResults.value) {
       // Store the presentation data in sessionStorage for the presentation page to access
-      sessionStorage.setItem('presentationData', JSON.stringify(generationResults.value))
-      console.log('Presentation data stored:', generationResults.value)
+      const presentationData = {
+        ...generationResults.value,
+        pptUrl: uploadedFiles.value.ppt.url
+      }
+      sessionStorage.setItem('presentationData', JSON.stringify(presentationData))
+      console.log('Presentation data stored:', presentationData)
     }
     
     navigateTo('/presentation')

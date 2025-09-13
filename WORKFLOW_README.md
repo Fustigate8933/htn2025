@@ -14,7 +14,7 @@ A comprehensive workflow page has been created at `/workflow` that integrates al
 - **Preview functionality** for generated content
 
 #### Workflow Steps:
-1. **Upload Materials**: PPT, face image, voice sample
+1. **Upload Materials**: PPT, face video, voice sample
 2. **Record Voice**: Browser-based voice recording with tips
 3. **Generate Content**: AI-powered script and avatar generation
 4. **Preview & Present**: Live presentation mode with controls
@@ -96,7 +96,7 @@ pnpm run dev
 
 ### Basic Workflow
 1. Navigate to `/workflow`
-2. Upload your materials (PPT, face image, voice sample)
+2. Upload your materials (PPT, face video, voice sample)
 3. Record or upload a voice sample
 4. Configure generation options
 5. Generate your presentation

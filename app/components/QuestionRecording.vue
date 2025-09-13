@@ -149,14 +149,16 @@ import { useAudioRecording } from '~/composables/useAudioRecording'
 // Props
 interface Props {
   onResponseGenerated?: (question: string, response: string) => void
+  pptUrl?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  onResponseGenerated: () => {}
+  onResponseGenerated: () => {},
+  pptUrl: ''
 })
 
 // Composables
-const recorder = useAudioRecording()
+const recorder = useAudioRecording(props.pptUrl)
 
 // State
 const isRequestingPermission = ref(false)

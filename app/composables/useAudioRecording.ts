@@ -10,7 +10,7 @@ export interface AudioRecordingState {
   transcript: string | null
 }
 
-export const useAudioRecording = () => {
+export const useAudioRecording = (pptUrl?: string) => {
   // State
   const isRecording = ref(false)
   const isProcessing = ref(false)
@@ -122,6 +122,11 @@ export const useAudioRecording = () => {
       // Convert audio to the format expected by the backend
       const formData = new FormData()
       formData.append('audio', audioBlob.value, 'question.webm')
+      
+      // Add PPT URL if available
+      if (pptUrl) {
+        formData.append('ppt_url', pptUrl)
+      }
       
       // Call the backend API for complete processing (audio-to-text + response generation)
       const result = await $fetch('/api/question/process', {

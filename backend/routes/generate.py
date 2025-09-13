@@ -19,7 +19,7 @@ async def generate_presentation(ppt_blob: str, face_blob: str, voice_blob: str, 
     try:
         # Download files from GCS
         ppt_temp = tempfile.NamedTemporaryFile(delete=False, suffix=".pptx")
-        face_temp = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
+        face_temp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
         voice_temp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
         
         try:
@@ -63,8 +63,8 @@ async def generate_presentation_script(ppt_path: str, voice_sample_path: str):
     return {"message": "Script generated successfully", "script": script}
 
 @router.post("/avatar")
-async def generate_presentation_avatar(face_image_path: str, voice_sample_path: str, avatar_type: str):
-    avatar_path = generate_avatar(face_image_path, voice_sample_path, avatar_type)
+async def generate_presentation_avatar(face_video_path: str, voice_sample_path: str, avatar_type: str):
+    avatar_path = generate_avatar(face_video_path, voice_sample_path, avatar_type)
     return {"message": "Avatar generated successfully", "avatar_path": avatar_path}
 
 @router.get("/speech")
