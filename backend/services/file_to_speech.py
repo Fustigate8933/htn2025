@@ -1,6 +1,6 @@
 from pptx import Presentation
 from PyPDF2 import PdfReader
-from coherex import generate_speech
+from generate_speech import generate_speech
 from gcp import GCSClient 
 import io
 import time
@@ -72,8 +72,18 @@ class PPTProcessor:
             time.sleep(7)
 
         return result
+
+"""
+Usage:
+    ppt_processor = file_to_speech.PPTProcessor()
+
+    ppt_path = "./test.pptx"
+    pdf_path = "./test.pdf"
+
+    ppt_text = ppt_processor.extract_ppt_text(ppt_path)
+    pdf_text = ppt_processor.extract_pdf_text(pdf_path)
     
-    # Usage: 
-    # ppt_processor = file_to_speech.PPTProcessor()
-    # file_path = "ppt/DeGLI_summary.pptx"
-    # speech_text = ppt_processor.file_to_speech(file_path)
+    prompt = ppt_processor.build_prompt(pdf_text)
+
+    speech_text = generate_speech(prompt)
+"""
