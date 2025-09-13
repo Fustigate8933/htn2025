@@ -66,6 +66,13 @@
         </div>
       </div>
       
+      <!-- Question Recording Panel -->
+      <div v-if="showRecordingPanel" class="absolute bottom-4 right-4 max-w-sm">
+        <QuestionRecording 
+          @response-generated="onQuestionResponse"
+        />
+      </div>
+      
       <!-- Control Panel (hidden by default, show on hover) -->
       <div 
         class="absolute top-4 right-4 opacity-0 hover:opacity-100 transition-opacity duration-300"
@@ -194,6 +201,9 @@
                   <span class="text-gray-400">
                     Press ESC to return to preview
                   </span>
+                  <span class="text-gray-400">
+                    Press R to toggle recording panel
+                  </span>
                 </div>
           </div>
         </div>
@@ -230,6 +240,7 @@
 
 <script setup lang="ts">
 import { useCamera } from '~/composables/useCamera'
+import QuestionRecording from '~/components/QuestionRecording.vue'
 
 // Types
 interface Slide {
@@ -255,6 +266,7 @@ const isPlaying = ref(false)
 const isLoading = ref(true)
 const error = ref<string | null>(null)
 const showControls = ref(false)
+const showRecordingPanel = ref(true)
 
 const avatarSize = ref(30)
 const avatarPosition = ref('bottom-right')
@@ -427,6 +439,20 @@ const retryLoad = () => {
   loadPresentation()
 }
 
+const onQuestionResponse = (question: string, response: string) => {
+  console.log('Question received:', question)
+  console.log('Response generated:', response)
+  
+  // You could add logic here to:
+  // - Display the response on screen
+  // - Save the Q&A to a log
+  // - Trigger additional presentation actions
+  // - Send the response to the avatar for speaking
+  
+  // For now, just log it
+  console.log('Q&A session:', { question, response })
+}
+
 // Keyboard shortcuts
 const handleKeydown = (event: KeyboardEvent) => {
   switch (event.key) {
@@ -452,6 +478,11 @@ const handleKeydown = (event: KeyboardEvent) => {
     case '2':
       event.preventDefault()
       switchToAvatar()
+      break
+    case 'r':
+    case 'R':
+      event.preventDefault()
+      showRecordingPanel.value = !showRecordingPanel.value
       break
   }
 }

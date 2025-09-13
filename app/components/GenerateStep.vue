@@ -65,7 +65,7 @@
             </div>
           </template>
           
-          <div class="space-y-4">
+          <div class="">
             <div class="space-y-2">
               <div class="flex justify-between text-sm">
                 <span>Processing slides...</span>
@@ -104,7 +104,7 @@
             </div>
           </template>
           
-          <div class="space-y-4">
+          <div class="">
             <p class="text-red-600">{{ error }}</p>
             <UButton @click="$emit('retry')" color="red" variant="outline">
               Try Again
@@ -120,7 +120,7 @@
             </div>
           </template>
           
-          <div class="space-y-4">
+          <div class="">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                 <h4 class="font-medium mb-2">Generated Script</h4>
