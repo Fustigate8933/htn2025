@@ -82,9 +82,14 @@ async def generate_presentation(
 
         print(f"DEMO MODE: Processed {len(slides_data)} slides with {'real' if ppt_result['slides'] else 'mock'} content")
 
-        # DEMO MODE: Use existing video files instead of generating new ones
-        video_urls = ['/1.mp4', '/2.mp4', '/3.mp4', '/4.mp4']
-        print(f"DEMO MODE: Using existing videos: {video_urls}")
+        # DEMO MODE: Generate video URLs using gen_video_batch (which now returns hardcoded paths)
+        print("DEMO MODE: Calling gen_video_batch to get video URLs...")
+        video_urls = gen_video_batch(
+            audio_path=voice_path,
+            video_path=face_temp.name,
+            tts_text=scripts
+        )
+        print(f"DEMO MODE: Received {len(video_urls)} video URLs from gen_video_batch")
 
         # Clean up temporary files
         try:

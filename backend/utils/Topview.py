@@ -123,8 +123,7 @@ def query_video_task(task_id: str, interval=5, max_tries=120) -> str:
         result = data.get("result", {})
         if result.get("status") == "success":
             video_url = result.get("outputVideoUrl")
-            _download_video(video_url, task_id)
-            return video_url
+            return _download_video(video_url, task_id)
         if result.get("status") == "failed":
             raise RuntimeError(f"Video task failed: {result}")
         time.sleep(interval)
@@ -144,28 +143,35 @@ def gen_video(audio_path: str, video_path: str, tts_text: str):
 
 
 def gen_video_batch(audio_path: str, video_path: str, tts_text: List[str]):
-    # Check if audio_path is a file path or an existing voice ID
-    if audio_path.startswith('/') or audio_path.endswith(('.mp3', '.wav', '.m4a')):
-        # It's a file path, upload and clone voice
-        origin_file_id = upload_file(audio_path)
-        print(f"Uploaded voice file: {origin_file_id}")
-
-        task_id = submit_voice_clone(origin_file_id)
-        print(f"Voice clone task: {task_id}")
-        voice_id = query_voice_clone(task_id)
-        print(f"Generated voice ID: {voice_id}")
-    else:
-        # It's an existing voice ID, use it directly
-        voice_id = audio_path
-        print(f"Using existing voice ID: {voice_id}")
-
-    video_file_id = upload_file(video_path)
-    out = [] 
-    for text in tts_text:
-        print(text)
-        video_task_id = submit_video_task(video_file_id, voice_id, text,
-                                      notice_url="https://421457f41c8d.ngrok-free.app/notice/topview")
-        out.append(query_video_task(video_task_id))
+    """
+    DEMO MODE: Return hardcoded video paths instead of generating actual videos
+    """
+    print(f"DEMO MODE: gen_video_batch called with {len(tts_text)} scripts")
+    print(f"DEMO MODE: Would normally process audio_path={audio_path}, video_path={video_path}")
+    
+    # DEMO MODE: Return hardcoded video paths for each script
+    # These correspond to the existing video files in the public directory
+    hardcoded_videos = [
+        "/1.mp4",
+        "/2.mp4", 
+        "/3.mp4",
+        "/4.mp4"
+    ]
+    
+    # Return the appropriate number of videos based on the number of scripts
+    out = []
+    for i, text in enumerate(tts_text):
+        if i < len(hardcoded_videos):
+            video_path = hardcoded_videos[i]
+            print(f"DEMO MODE: Returning hardcoded video {i+1}: {video_path} for script: {text[:50]}...")
+            out.append(video_path)
+        else:
+            # If there are more scripts than videos, cycle through the available videos
+            video_path = hardcoded_videos[i % len(hardcoded_videos)]
+            print(f"DEMO MODE: Cycling video for script {i+1}: {video_path} for script: {text[:50]}...")
+            out.append(video_path)
+    
+    print(f"DEMO MODE: Returning {len(out)} hardcoded video paths")
     return out
 
 if __name__ == "__main__":
