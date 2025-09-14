@@ -144,47 +144,82 @@ def gen_video(audio_path: str, video_path: str, tts_text: str):
 
 def gen_video_batch(audio_path: str, video_path: str, tts_text: List[str]):
     """
-    DEMO MODE: Return hardcoded video paths and IDs instead of generating actual videos
+    Generate videos and return IDs - supports both demo and production modes
     """
-    print(f"DEMO MODE: gen_video_batch called with {len(tts_text)} scripts")
-    print(f"DEMO MODE: Would normally process audio_path={audio_path}, video_path={video_path}")
+    import os
+    DEMO_MODE = os.getenv('DEMO_MODE', 'false').lower() == 'true'
     
-    # DEMO MODE: Return hardcoded video paths for each script
-    # These correspond to the existing video files in the public directory
-    hardcoded_videos = [
-        "/1.mp4",
-        "/2.mp4", 
-        "/3.mp4",
-        "/4.mp4"
-    ]
-    
-    # DEMO MODE: Generate dummy IDs for testing
-    import uuid
-    dummy_voice_id = f"demo_voice_{uuid.uuid4().hex[:8]}"
-    dummy_video_file_id = f"demo_video_{uuid.uuid4().hex[:8]}"
-    
-    print(f"DEMO MODE: Generated dummy voice_id: {dummy_voice_id}")
-    print(f"DEMO MODE: Generated dummy video_file_id: {dummy_video_file_id}")
-    
-    # Return the appropriate number of videos based on the number of scripts
-    out = []
-    for i, text in enumerate(tts_text):
-        if i < len(hardcoded_videos):
-            video_path = hardcoded_videos[i]
-            print(f"DEMO MODE: Returning hardcoded video {i+1}: {video_path} for script: {text[:50]}...")
-            out.append(video_path)
-        else:
-            # If there are more scripts than videos, cycle through the available videos
-            video_path = hardcoded_videos[i % len(hardcoded_videos)]
-            print(f"DEMO MODE: Cycling video for script {i+1}: {video_path} for script: {text[:50]}...")
-            out.append(video_path)
-    
-    print(f"DEMO MODE: Returning {len(out)} hardcoded video paths")
-    return {
-        "video_urls": out,
-        "voice_id": dummy_voice_id,
-        "video_file_id": dummy_video_file_id
-    }
+    if DEMO_MODE:
+        print(f"DEMO MODE: gen_video_batch called with {len(tts_text)} scripts")
+        print(f"DEMO MODE: Would normally process audio_path={audio_path}, video_path={video_path}")
+        
+        # DEMO MODE: Return hardcoded video paths for each script
+        hardcoded_videos = ["/1.mp4", "/2.mp4", "/3.mp4", "/4.mp4"]
+        
+        # DEMO MODE: Generate dummy IDs for testing
+        import uuid
+        dummy_voice_id = f"demo_voice_{uuid.uuid4().hex[:8]}"
+        dummy_video_file_id = f"demo_video_{uuid.uuid4().hex[:8]}"
+        
+        print(f"DEMO MODE: Generated dummy voice_id: {dummy_voice_id}")
+        print(f"DEMO MODE: Generated dummy video_file_id: {dummy_video_file_id}")
+        
+        # Return the appropriate number of videos based on the number of scripts
+        out = []
+        for i, text in enumerate(tts_text):
+            if i < len(hardcoded_videos):
+                video_path = hardcoded_videos[i]
+                print(f"DEMO MODE: Returning hardcoded video {i+1}: {video_path} for script: {text[:50]}...")
+                out.append(video_path)
+            else:
+                # If there are more scripts than videos, cycle through the available videos
+                video_path = hardcoded_videos[i % len(hardcoded_videos)]
+                print(f"DEMO MODE: Cycling video for script {i+1}: {video_path} for script: {text[:50]}...")
+                out.append(video_path)
+        
+        print(f"DEMO MODE: Returning {len(out)} hardcoded video paths")
+        return {
+            "video_urls": out,
+            "voice_id": dummy_voice_id,
+            "video_file_id": dummy_video_file_id
+        }
+    else:
+        print(f"PRODUCTION MODE: gen_video_batch called with {len(tts_text)} scripts")
+        print(f"PRODUCTION MODE: Processing audio_path={audio_path}, video_path={video_path}")
+        
+        # Step 1: Upload voice file and get voice_id
+        print("PRODUCTION MODE: Uploading voice file and cloning voice...")
+        origin_file_id = upload_file(audio_path)
+        task_id = submit_voice_clone(origin_file_id)
+        voice_id = query_voice_clone(task_id)
+        print(f"PRODUCTION MODE: Generated voice_id: {voice_id}")
+        
+        # Step 2: Upload video file and get video_file_id
+        print("PRODUCTION MODE: Uploading video file...")
+        video_file_id = upload_file(video_path)
+        print(f"PRODUCTION MODE: Generated video_file_id: {video_file_id}")
+        
+        # Step 3: Generate videos for each script
+        print("PRODUCTION MODE: Generating videos for each script...")
+        video_urls = []
+        for i, text in enumerate(tts_text):
+            print(f"PRODUCTION MODE: Generating video {i+1}/{len(tts_text)} for script: {text[:50]}...")
+            
+            # Submit video task
+            video_task_id = submit_video_task(video_file_id, voice_id, text)
+            
+            # Query video task and get result
+            output_path = query_video_task(video_task_id)
+            video_urls.append(output_path)
+            
+            print(f"PRODUCTION MODE: Generated video {i+1}: {output_path}")
+        
+        print(f"PRODUCTION MODE: Generated {len(video_urls)} real videos")
+        return {
+            "video_urls": video_urls,
+            "voice_id": voice_id,
+            "video_file_id": video_file_id
+        }
 
 if __name__ == "__main__":
     gen_video('/mnt/ianch-Secondary/Programming/htn2025/public/University of Waterloo.mp3', '/mnt/ianch-Secondary/Programming/htn2025/public/4cfc3a660bc9c4ebf4ed073025dd0252.mp4', "Hello world")
