@@ -1,6 +1,6 @@
 from pptx import Presentation
 from PyPDF2 import PdfReader
-from generate_speech import generate_speech
+from services.generate_speech import generate_speech
 from google.cloud import storage
 import io
 import time

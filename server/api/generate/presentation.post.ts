@@ -1,6 +1,6 @@
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const { ppt_blob, ppt_url, face_blob, face_url, voice_blob, voice_url, style } = body
+  const { ppt_blob, face_blob, voice_blob, style } = body
 
   if (!ppt_blob || !face_blob || !voice_blob) {
     throw createError({ 
@@ -16,11 +16,8 @@ export default defineEventHandler(async (event) => {
       method: "POST",
       body: { 
         ppt_blob, 
-        ppt_url,
         face_blob, 
-        face_url,
         voice_blob, 
-        voice_url,
         style: style || "professional" 
       }
     })

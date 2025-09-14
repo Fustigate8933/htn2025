@@ -1,7 +1,7 @@
 import config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import upload, generate, health, audio_to_text, simple_ppt, question_handler
+from routes import upload, generate, health, audio_to_text, simple_ppt, question_handler, notice
 from services import asr
 
 app = FastAPI(title="Hack the stage API")
@@ -21,6 +21,7 @@ app.include_router(generate.router, prefix="/generate", tags=["Generate"])
 app.include_router(audio_to_text.router, prefix="/dev", tags=["Dev"])
 app.include_router(simple_ppt.router, prefix="/simple", tags=["Simple"])
 app.include_router(question_handler.router, prefix="/questions", tags=["Questions"])
+app.include_router(notice.router, prefix="/notice", tags=["Notice"])
 
 @app.get("/")
 def read_root():
