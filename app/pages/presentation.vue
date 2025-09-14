@@ -75,7 +75,7 @@
       </div>
       
       <!-- Question Recording Panel -->
-      <div v-if="showRecordingPanel" class="absolute bottom-20 left-4 max-w-sm">
+      <div v-if="showRecordingPanel" class="absolute bottom-10 left-4 max-w-sm">
         <QuestionRecording 
 					class="mb-[4rem]"
           :ppt-url="presentationData?.pptUrl || ''"

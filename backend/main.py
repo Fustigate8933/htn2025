@@ -1,11 +1,7 @@
 import config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-<<<<<<< Updated upstream
 from routes import upload, generate, health, audio_to_text, simple_ppt, question_handler, notice
-=======
-from routes import upload, generate, health, audio_to_text, simple_ppt, question_handler
->>>>>>> Stashed changes
 from services import asr
 from services import cloudfare_audio_to_text
 

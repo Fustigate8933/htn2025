@@ -24,7 +24,6 @@
         >
           <UIcon name="ic:outline-mic" class="mr-2" />
           Record Question 
-			{{ recorder.audioUrl.value }}
         </UButton>
       </div>
       
