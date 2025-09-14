@@ -5,7 +5,6 @@ from google.cloud import storage
 import io
 import time
 
-
 class PPTProcessor:
     def __init__(self):
         # Initialize the official GCS client
@@ -60,7 +59,7 @@ class PPTProcessor:
         Build the prompt to send to cohere API based on the extracted text
         """
         prompt = (
-            f"Use English to generate a speech draft for Slide/Page {ppt_text['page_num']}.\n\n"
+            f"Use English to generate a speech draft for Slide/Page {ppt_text['page_num']}. Use simple expressions,avoiding complex between sentences are clear.\n\n"
             f"Content:\n{ppt_text['text']}\n\n"
             "Please output a clear and complete speech text for this slide/page. "
             "Do not summarize, make it ready to speak."
@@ -90,9 +89,7 @@ if __name__ == "__main__":
     ppt_processor = PPTProcessor()
 
     ppt_path = "/mnt/ianch-Secondary/Downloads/tmp/CS136W25 Midterm Review .pptx"
-
     ppt_text = ppt_processor.extract_ppt_text(ppt_path)
-
     for page in ppt_text:
         prompt = ppt_processor.build_prompt(page)
         speech_text = generate_speech(prompt)

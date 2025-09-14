@@ -10,7 +10,7 @@ asr = ASRService()
 gcs = GCSClient()
 
 # hard code path
-LOCAL_AUDIO_PATH = "/Users/hanyunguo/Downloads/2025-08-28 21-17-24.wav"
+LOCAL_AUDIO_PATH = "/Users/hanyunguo/Downloads/New Folder With Items/University of Waterloo.mp3"
 
 @router.post("/local-audio-to-text")
 def hardcoded_audio_to_text(lang: str = "en-US"):
