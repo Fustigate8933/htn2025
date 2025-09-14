@@ -5,7 +5,7 @@
       <!-- Main Presentation Area -->
       <div class="absolute inset-0 bg-gray-900">
         <!-- Slide Content -->
-        <div class="w-full h-full flex items-center justify-center p-8">
+        <div class="w-full h-full flex items-center justify-center p-8 pb-50">
           <div v-if="currentSlide" class="w-full h-full flex items-center justify-center">
             <!-- Display slide image if available -->
             <div v-if="currentSlide.image" class="w-full h-full flex items-center justify-center">
@@ -29,18 +29,22 @@
         
         <!-- Avatar Video Overlay -->
         <div 
-          v-if="currentMode === 'avatar' && currentVideoUrl"
+          v-if="currentVideoUrl"
           :class="[
             'absolute transition-all duration-300 ease-in-out',
             getAvatarPosition()
           ]"
-          :style="{ width: `${avatarSize}%`, height: `${avatarSize * 0.75}%` }"
+          :style="{ 
+            width: `${avatarSize}%`, 
+            height: `${avatarSize * 0.75}%`,
+            zIndex: currentMode === 'avatar' ? 20 : 10
+          }"
         >
           <video 
             ref="avatarVideo"
             :src="currentVideoUrl"
             class="w-full h-full object-cover rounded-lg shadow-2xl"
-            :autoplay="isPlaying"
+            :autoplay="isPlaying && currentMode === 'avatar'"
             :loop="false"
             :muted="false"
             @ended="onVideoEnd"
@@ -49,12 +53,16 @@
         
         <!-- Human Camera Overlay -->
         <div 
-          v-if="currentMode === 'human' && camera.hasCameraAccess"
+          v-if="camera.hasCameraAccess"
           :class="[
             'absolute transition-all duration-300 ease-in-out',
             getAvatarPosition()
           ]"
-          :style="{ width: `${avatarSize}%`, height: `${avatarSize * 0.75}%` }"
+          :style="{ 
+            width: `${avatarSize}%`, 
+            height: `${avatarSize * 0.75}%`,
+            zIndex: currentMode === 'human' ? 20 : 10
+          }"
         >
           <video 
             ref="cameraVideo"
@@ -67,7 +75,7 @@
       </div>
       
       <!-- Question Recording Panel -->
-      <div v-if="showRecordingPanel" class="absolute bottom-4 left-4 max-w-sm">
+      <div v-if="showRecordingPanel" class="absolute bottom-20 left-4 max-w-sm">
         <QuestionRecording 
 					class="mb-[4rem]"
           :ppt-url="presentationData?.pptUrl || ''"
@@ -287,8 +295,8 @@ const currentSlide = computed(() => {
 // Methods
 const getAvatarPosition = () => {
   const positions = {
-    'bottom-right': 'bottom-4 right-4',
-    'bottom-left': 'bottom-4 left-4',
+    'bottom-right': 'bottom-20 right-4',
+    'bottom-left': 'bottom-20 left-4',
     'top-right': 'top-4 right-4',
     'top-left': 'top-4 left-4',
     'center': 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2'
@@ -297,6 +305,12 @@ const getAvatarPosition = () => {
 }
 
 const switchToHuman = async () => {
+  // Pause the avatar video when switching to camera mode
+  if (avatarVideo.value) {
+    avatarVideo.value.pause()
+    console.log('Avatar video paused for camera mode')
+  }
+  
   currentMode.value = 'human'
   
   // Use shared camera state
@@ -321,13 +335,19 @@ const switchToHuman = async () => {
 
 const switchToAvatar = async () => {
   currentMode.value = 'avatar'
-  isPlaying.value = true
+  
+  // Resume the avatar video when switching back to avatar mode
+  if (avatarVideo.value && isPlaying.value) {
+    avatarVideo.value.play()
+    console.log('Avatar video resumed for avatar mode')
+  }
 }
 
 const togglePlayback = () => {
   isPlaying.value = !isPlaying.value
   
-  if (avatarVideo.value) {
+  // Only control avatar video playback when in avatar mode
+  if (avatarVideo.value && currentMode.value === 'avatar') {
     if (isPlaying.value) {
       avatarVideo.value.play()
     } else {
@@ -341,7 +361,8 @@ const restartPresentation = () => {
   isPlaying.value = true
   loadCurrentVideo()
   
-  if (avatarVideo.value) {
+  // Only restart avatar video when in avatar mode
+  if (avatarVideo.value && currentMode.value === 'avatar') {
     avatarVideo.value.currentTime = 0
     avatarVideo.value.play()
   }
@@ -374,10 +395,10 @@ const loadMockData = () => {
 }
 
 const onVideoEnd = () => {
-  // Auto-advance to next slide when video ends
-  if (currentSlideIndex.value < (presentationData.value?.slides.length || 0) - 1) {
+  // Auto-advance to next slide when video ends (only in avatar mode)
+  if (currentMode.value === 'avatar' && currentSlideIndex.value < (presentationData.value?.slides.length || 0) - 1) {
     nextSlide()
-  } else {
+  } else if (currentMode.value === 'avatar') {
     // End of presentation
     isPlaying.value = false
   }
