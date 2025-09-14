@@ -82,14 +82,19 @@ async def generate_presentation(
 
         print(f"DEMO MODE: Processed {len(slides_data)} slides with {'real' if ppt_result['slides'] else 'mock'} content")
 
-        # DEMO MODE: Generate video URLs using gen_video_batch (which now returns hardcoded paths)
-        print("DEMO MODE: Calling gen_video_batch to get video URLs...")
-        video_urls = gen_video_batch(
+        # DEMO MODE: Generate video URLs using gen_video_batch (which now returns hardcoded paths and IDs)
+        print("DEMO MODE: Calling gen_video_batch to get video URLs and IDs...")
+        gen_result = gen_video_batch(
             audio_path=voice_path,
             video_path=face_temp.name,
             tts_text=scripts
         )
+        video_urls = gen_result["video_urls"]
+        voice_id = gen_result["voice_id"]
+        video_file_id = gen_result["video_file_id"]
         print(f"DEMO MODE: Received {len(video_urls)} video URLs from gen_video_batch")
+        print(f"DEMO MODE: Received voice_id: {voice_id}")
+        print(f"DEMO MODE: Received video_file_id: {video_file_id}")
 
         # Clean up temporary files
         try:
@@ -105,7 +110,9 @@ async def generate_presentation(
             "presentation": {
                 "slides": slides_data,
                 "scripts": scripts,
-                "video_urls": video_urls
+                "video_urls": video_urls,
+                "voice_id": voice_id,
+                "video_file_id": video_file_id
             }
         }
     except Exception as e:

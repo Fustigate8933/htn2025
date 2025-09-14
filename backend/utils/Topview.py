@@ -144,7 +144,7 @@ def gen_video(audio_path: str, video_path: str, tts_text: str):
 
 def gen_video_batch(audio_path: str, video_path: str, tts_text: List[str]):
     """
-    DEMO MODE: Return hardcoded video paths instead of generating actual videos
+    DEMO MODE: Return hardcoded video paths and IDs instead of generating actual videos
     """
     print(f"DEMO MODE: gen_video_batch called with {len(tts_text)} scripts")
     print(f"DEMO MODE: Would normally process audio_path={audio_path}, video_path={video_path}")
@@ -157,6 +157,14 @@ def gen_video_batch(audio_path: str, video_path: str, tts_text: List[str]):
         "/3.mp4",
         "/4.mp4"
     ]
+    
+    # DEMO MODE: Generate dummy IDs for testing
+    import uuid
+    dummy_voice_id = f"demo_voice_{uuid.uuid4().hex[:8]}"
+    dummy_video_file_id = f"demo_video_{uuid.uuid4().hex[:8]}"
+    
+    print(f"DEMO MODE: Generated dummy voice_id: {dummy_voice_id}")
+    print(f"DEMO MODE: Generated dummy video_file_id: {dummy_video_file_id}")
     
     # Return the appropriate number of videos based on the number of scripts
     out = []
@@ -172,7 +180,11 @@ def gen_video_batch(audio_path: str, video_path: str, tts_text: List[str]):
             out.append(video_path)
     
     print(f"DEMO MODE: Returning {len(out)} hardcoded video paths")
-    return out
+    return {
+        "video_urls": out,
+        "voice_id": dummy_voice_id,
+        "video_file_id": dummy_video_file_id
+    }
 
 if __name__ == "__main__":
     gen_video('/mnt/ianch-Secondary/Programming/htn2025/public/University of Waterloo.mp3', '/mnt/ianch-Secondary/Programming/htn2025/public/4cfc3a660bc9c4ebf4ed073025dd0252.mp4', "Hello world")

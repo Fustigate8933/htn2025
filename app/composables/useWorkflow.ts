@@ -31,6 +31,8 @@ export interface GenerationResults {
   script: string
   slides: any[]
   videoUrls: string[]
+  voiceId: string
+  videoFileId: string
 }
 
 export interface PresentationSettings {
@@ -209,7 +211,9 @@ export const useWorkflow = () => {
         presentation: { 
           slides: any[]; 
           scripts: string[]; 
-          video_urls: string[] 
+          video_urls: string[];
+          voice_id: string;
+          video_file_id: string;
         } 
       }
       
@@ -219,11 +223,15 @@ export const useWorkflow = () => {
         // Handle the response from the updated backend that now includes real video URLs
         const videoUrls = response.presentation.video_urls || []
         const scripts = response.presentation.scripts || []
+        const voiceId = response.presentation.voice_id || 'demo_voice_fallback_123'
+        const videoFileId = response.presentation.video_file_id || 'demo_video_fallback_456'
         
         generationResults.value = {
           script: scripts.join('\n\n'),
           slides: response.presentation.slides,
-          videoUrls: videoUrls
+          videoUrls: videoUrls,
+          voiceId: voiceId,
+          videoFileId: videoFileId
         }
         
         // Mark all progress as complete
@@ -238,9 +246,13 @@ export const useWorkflow = () => {
         console.log('Presentation generated successfully with videos:', {
           slides: response.presentation.slides.length,
           videos: videoUrls.length,
-          scripts: scripts.length
+          scripts: scripts.length,
+          voiceId: voiceId,
+          videoFileId: videoFileId
         })
         console.log('Video URLs:', videoUrls)
+        console.log('Voice ID:', voiceId)
+        console.log('Video File ID:', videoFileId)
       } else {
         throw new Error('Generation failed')
       }
@@ -286,9 +298,14 @@ export const useWorkflow = () => {
       // Store the presentation data in sessionStorage for the presentation page to access
       const presentationData = {
         ...generationResults.value,
-        pptUrl: uploadedFiles.value.ppt.url
+        pptUrl: uploadedFiles.value.ppt.url,
+        videoBlob: uploadedFiles.value.face.blob,
+        voiceId: generationResults.value.voiceId,
+        videoFileId: generationResults.value.videoFileId
       }
-      sessionStorage.setItem('presentationData', JSON.stringify(presentationData))
+      if (process.client) {
+        sessionStorage.setItem('presentationData', JSON.stringify(presentationData))
+      }
       console.log('Presentation data stored:', presentationData)
     }
     

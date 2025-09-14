@@ -10,7 +10,7 @@ export interface AudioRecordingState {
   transcript: string | null
 }
 
-export const useAudioRecording = (pptUrl?: string) => {
+export const useAudioRecording = (pptUrl?: string, voiceId?: string, videoFileId?: string, slideNumber?: number) => {
   // State
   const isRecording = ref(false)
   const isProcessing = ref(false)
@@ -104,16 +104,34 @@ export const useAudioRecording = (pptUrl?: string) => {
     }
   }
 
-  const stopRecording = () => {
-    if (!isRecording.value || !mediaRecorder.value) return
-    
-    mediaRecorder.value.stop()
-    isRecording.value = false
-    mediaRecorder.value = null
-  }
+	const stopRecording = async (): Promise<Blob | null> => {
+		if (!isRecording.value || !mediaRecorder.value) return null;
 
-  const processAudio = async (): Promise<{transcript: string, response: string} | null> => {
-    if (!audioBlob.value || isProcessing.value) return null
+		return new Promise((resolve) => {
+			mediaRecorder.value!.onstop = () => {
+				const blob = new Blob(audioChunks.value, { type: 'audio/webm' })
+				audioBlob.value = blob
+				audioUrl.value = URL.createObjectURL(blob)
+
+				if (audioStream.value) {
+					audioStream.value.getTracks().forEach(track => track.stop())
+					audioStream.value = null
+				}
+
+				resolve(blob) // ✅ now we resolve when blob is ready
+			}
+
+			mediaRecorder.value!.stop()
+			isRecording.value = false
+			mediaRecorder.value = null
+		})
+	}
+
+
+  const processAudio = async (blob?: Blob): Promise<{transcript: string, response: string} | null> => {
+		console.log('Processing audio blob:', blob)
+    const audioToProcess = blob || audioBlob.value
+    if (!audioToProcess || isProcessing.value) return null
     
     isProcessing.value = true
     error.value = null
@@ -121,13 +139,29 @@ export const useAudioRecording = (pptUrl?: string) => {
     try {
       // Convert audio to the format expected by the backend
       const formData = new FormData()
-      formData.append('audio', audioBlob.value, 'question.webm')
+      formData.append('audio', audioToProcess, 'question.webm')
       
       // Add PPT URL if available
       if (pptUrl) {
         formData.append('ppt_url', pptUrl)
       }
       
+      // Add voice ID if available
+      if (voiceId) {
+        formData.append('voice_id', voiceId)
+      }
+      
+      // Add video file ID if available
+      if (videoFileId) {
+        formData.append('video_file_id', videoFileId)
+      }
+      
+      // Add slide number if available
+      if (slideNumber !== undefined) {
+        formData.append('slide_number', slideNumber.toString())
+      }
+      
+			console.log(formData)
       // Call the backend API for complete processing (audio-to-text + response generation)
       const result = await $fetch('/api/question/process', {
         method: 'POST',
@@ -186,6 +220,20 @@ export const useAudioRecording = (pptUrl?: string) => {
     }
   })
 
+	const saveRecordingLocally = (filename = 'recording.webm') => {
+		console.log(audioBlob.value)
+		if (!audioBlob.value) return;
+
+		const link = document.createElement('a');
+		link.href = URL.createObjectURL(audioBlob.value);
+		link.download = filename; // will overwrite if you download again with same name
+		link.click();
+
+		// Clean up
+		URL.revokeObjectURL(link.href);
+	}
+
+
   return {
     // State
     isRecording: readonly(isRecording),
@@ -203,6 +251,7 @@ export const useAudioRecording = (pptUrl?: string) => {
     stopRecording,
     processAudio,
     clearRecording,
-    getRecordingDuration
+    getRecordingDuration,
+		saveRecordingLocally,
   }
 }

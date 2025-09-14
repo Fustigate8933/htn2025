@@ -23,7 +23,8 @@
           class="record-button"
         >
           <UIcon name="ic:outline-mic" class="mr-2" />
-          Record Question
+          Record Question 
+			{{ recorder.audioUrl.value }}
         </UButton>
       </div>
       
@@ -149,10 +150,16 @@ import { useAudioRecording } from '~/composables/useAudioRecording'
 // Props
 interface Props {
   pptUrl?: string
+  voiceId?: string
+  videoFileId?: string
+  slideNumber?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  pptUrl: ''
+  pptUrl: '',
+  voiceId: '',
+  videoFileId: '',
+  slideNumber: 0
 })
 
 // Emits
@@ -161,7 +168,7 @@ const emit = defineEmits<{
 }>()
 
 // Composables
-const recorder = useAudioRecording(props.pptUrl)
+const recorder = useAudioRecording(props.pptUrl, props.voiceId, props.videoFileId, props.slideNumber)
 
 // State
 const isRequestingPermission = ref(false)
@@ -186,13 +193,15 @@ const startRecording = async () => {
 }
 
 const stopRecording = async () => {
-  recorder.stopRecording()
+  const blob = await recorder.stopRecording()
   // Auto-process the recording after stopping
-  await processRecording()
+	console.log(recorder)
+	console.log('Audio blob:', blob)
+  await processRecording(blob)
 }
 
-const processRecording = async () => {
-  const result = await recorder.processAudio()
+const processRecording = async (blob?: Blob) => {
+  const result = await recorder.processAudio(blob)
   if (result) {
     // Emit the event with both transcript and response
     emit('responseGenerated', result.transcript, result.response)

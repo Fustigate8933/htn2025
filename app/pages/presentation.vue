@@ -79,6 +79,9 @@
         <QuestionRecording 
 					class="mb-[4rem]"
           :ppt-url="presentationData?.pptUrl || ''"
+          :voice-id="getVoiceId()"
+          :video-file-id="getVideoFileId()"
+          :slide-number="currentSlideIndex"
           @response-generated="onQuestionResponse"
         />
       </div>
@@ -411,24 +414,30 @@ const loadPresentation = async () => {
   
   try {
     // Load presentation data from sessionStorage (passed from workflow)
-    const storedData = sessionStorage.getItem('presentationData')
-    
-    if (storedData) {
-      try {
-        const parsedData = JSON.parse(storedData)
-        presentationData.value = {
-          slides: parsedData.slides || [],
-          videoUrls: parsedData.videoUrls || [],
-          script: parsedData.script || ''
+    if (process.client) {
+      const storedData = sessionStorage.getItem('presentationData')
+      
+      if (storedData) {
+        try {
+          const parsedData = JSON.parse(storedData)
+          presentationData.value = {
+            slides: parsedData.slides || [],
+            videoUrls: parsedData.videoUrls || [],
+            script: parsedData.script || ''
+          }
+          console.log('Loaded presentation data from workflow:', presentationData.value)
+        } catch (parseError) {
+          console.error('Failed to parse presentation data:', parseError)
+          // Fall back to mock data
+          loadMockData()
         }
-        console.log('Loaded presentation data from workflow:', presentationData.value)
-      } catch (parseError) {
-        console.error('Failed to parse presentation data:', parseError)
-        // Fall back to mock data
+      } else {
+        console.log('No presentation data found, using mock data')
+        // Fall back to mock data if no data is available
         loadMockData()
       }
     } else {
-      console.log('No presentation data found, using mock data')
+      console.log('Running on server side, using mock data')
       // Fall back to mock data if no data is available
       loadMockData()
     }
@@ -458,6 +467,38 @@ const loadPresentation = async () => {
 const retryLoad = () => {
   error.value = null
   loadPresentation()
+}
+
+const getVoiceId = () => {
+  // Get the voice ID from sessionStorage (stored during workflow)
+  if (process.client) {
+    const storedData = sessionStorage.getItem('presentationData')
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData)
+        return parsedData.voiceId || 'demo_voice_fallback_123'
+      } catch (error) {
+        console.error('Failed to parse presentation data for voice ID:', error)
+      }
+    }
+  }
+  return 'demo_voice_fallback_123'
+}
+
+const getVideoFileId = () => {
+  // Get the video file ID from sessionStorage (stored during workflow)
+  if (process.client) {
+    const storedData = sessionStorage.getItem('presentationData')
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData)
+        return parsedData.videoFileId || 'demo_video_fallback_456'
+      } catch (error) {
+        console.error('Failed to parse presentation data for video file ID:', error)
+      }
+    }
+  }
+  return 'demo_video_fallback_456'
 }
 
 const onQuestionResponse = (question: string, response: string) => {

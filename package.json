@@ -4,10 +4,9 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-
-	"dev": "concurrently \"pnpm frontend\" \"pnpm backend\"",
+    "dev": "concurrently \"pnpm frontend\" \"pnpm backend\"",
     "frontend": "nuxt dev",
-		"backend": "cd backend && PYTHONPATH=. uvicorn main:app --reload --host 0.0.0.0 --port 8000",
+    "backend": "cd backend && PYTHONPATH=. uvicorn main:app --reload --host 0.0.0.0 --port 8000",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
@@ -19,6 +18,7 @@
     "@iconify-json/simple-icons": "^1.2.48",
     "@nuxt/image": "1.11.0",
     "@nuxt/ui": "^3.3.2",
+    "lamejs": "^1.2.1",
     "nuxt": "^4.0.3"
   },
   "devDependencies": {
