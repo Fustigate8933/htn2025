@@ -141,6 +141,11 @@ def gen_video(audio_path: str, video_path: str, tts_text: str):
                                       notice_url="https://410534426f02.ngrok-free.app/notice/topview")
     output_url = query_video_task(video_task_id)
 
+def gen_video_answer(video_file_id, voice_id, tts_text):
+    video_task_id = submit_video_task(video_file_id, voice_id, tts_text,
+                                      notice_url="https://410534426f02.ngrok-free.app/notice/topview")
+    output_url = query_video_task(video_task_id)
+    return output_url
 
 def gen_video_batch(audio_path: str, video_path: str, tts_text: List[str]):
     """

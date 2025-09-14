@@ -4,13 +4,12 @@ import os, mimetypes, requests
 
 router = APIRouter()
 
-LOCAL_AUDIO_PATH = "/Users/hanyunguo/Downloads/New Folder With Items/question.mp3" 
+LOCAL_AUDIO_PATH = "/Users/hanyunguo/Downloads/New Folder With Items/University of Waterloo.mp3" 
 MODEL = "@cf/openai/whisper"
 
 CF_ACCOUNT_ID = os.getenv("CF_ACCOUNT_ID")
 CF_API_TOKEN  = os.getenv("CF_API_TOKEN")
 
-COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 def _guess_content_type(path: str) -> str:
     ctype, _ = mimetypes.guess_type(path)
     if ctype:
@@ -26,7 +25,7 @@ def cloudfare_audio_to_text(audio_path):
     if not CF_ACCOUNT_ID or not CF_API_TOKEN:
         raise HTTPException(status_code=500, detail="Missing CF_ACCOUNT_ID / CF_API_TOKEN in backend/.env")
     if not os.path.exists(audio_path):
-        raise HTTPException(status_code=400, detail=f"Audio not found: {LOCAL_AUDIO_PATH}")
+        raise HTTPException(status_code=400, detail=f"Audio not found: {audio_path}")
 
     with open(audio_path, "rb") as f:
         audio_bytes = f.read()
@@ -34,7 +33,7 @@ def cloudfare_audio_to_text(audio_path):
     url = f"https://api.cloudflare.com/client/v4/accounts/{CF_ACCOUNT_ID}/ai/run/{MODEL}"
     headers = {
         "Authorization": f"Bearer {CF_API_TOKEN}",
-        "Content-Type": _guess_content_type(LOCAL_AUDIO_PATH)
+        "Content-Type": _guess_content_type(audio_path)
     }
 
     try:

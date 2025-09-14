@@ -37,16 +37,15 @@ def answer_prompt(ppt_text, question):
     )
     return prompt
 
-def generate_answer(style="humorous", max_tokens=50):
+def generate_answer(page_num, audio_path, ppt_path, style="humorous", max_tokens=50):
     ppt_processor = PPTProcessor()
-    PAGE_NUM = 1
-    ppt_path = "/Users/hanyunguo/Downloads/New Folder With Items/test.pptx"
-    audio_path = "/Users/hanyunguo/Downloads/New Folder With Items/question.mp3"
+    # ppt_path = "/Users/hanyunguo/Downloads/New Folder With Items/test.pptx"
+    # audio_path = "/Users/hanyunguo/Downloads/New Folder With Items/question.mp3"
     ppt_text = ppt_processor.extract_ppt_text(ppt_path)
     transcript = cloudfare_audio_to_text(audio_path)
     question = json.loads(transcript.body).get("speech-to-text", "")
-    prompt = answer_prompt(ppt_text[PAGE_NUM], question)
-    print(f"Generated answer for speech {PAGE_NUM}:\n{prompt}\n")
+    prompt = answer_prompt(ppt_text[page_num], question)
+    print(f"Generated answer for speech {page_num}:\n{prompt}\n")
 
     try:
         # Updated Cohere API call
