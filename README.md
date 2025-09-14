@@ -1,18 +1,18 @@
 # Hack-the-Stage
-## OBS setup
+
+## Frontend (dev server at `http://localhost:3000`)
 ```bash
-brew install --cask obs
+pnpm i
+pnpm run dev
 ```
-Run the OBS connection test
+## Speech to Text 
 ```bash
-cd Hack-the-Stage/backend_new
-python obsCheck.py
+cd Hack-the-Stage/backend
+uvicorn main:app --reload 
+curl -X POST http://127.0.0.1:8000/dev/local-audio-to-text
 ```
-Switch scene & play a video via code
-```bash
-cd backend_new
-python obs_control.py
-```
+## response text
+python services/answer_question.py
 
 ## HeyGen token sanity check
 ```bash
@@ -32,15 +32,4 @@ python -m backend.tools.smoke_tests
 python -m backend.tools.smoke_tests --cohere
 python -m backend.tools.smoke_tests --gcs
 python -m backend.tools.smoke_tests --gcpconf
-```
-## Frontend (dev server at `http://localhost:3000`)
-```bash
-pnpm i
-pnpm run dev
-```
-## Speech to Text 
-```bash
-cd Hack-the-Stage/backend
-uvicorn main:app --reload 
-curl -X POST http://127.0.0.1:8000/dev/local-audio-to-text
 ```
