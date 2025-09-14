@@ -17,7 +17,7 @@
           <div class="flex flex-col gap-3">
             <UFileUpload
               v-model="uploadData.pptFile"
-              class="w-full h-50 hover:cursor-pointer"
+              class="w-full h-66 hover:cursor-pointer"
               label="Drop your PPTX file here"
               description=".PPTX (Max 10MB)"
               :highlight="true"
@@ -53,7 +53,7 @@
           <div class="flex flex-col gap-3">
             <UFileUpload
               v-model="uploadData.faceFile"
-              class="w-full h-50 hover:cursor-pointer"
+              class="w-full h-66 hover:cursor-pointer"
               label="Drop your video here"
               description=".MP4, .MOV, .AVI (Max 50MB)"
               :highlight="true"
@@ -87,29 +87,55 @@
             <p class="text-sm text-gray-600 dark:text-gray-400">Audio file for voice cloning</p>
           </template>
           <div class="flex flex-col gap-3">
-            <UFileUpload
-              v-model="uploadData.voiceFile"
-              class="w-full h-50 hover:cursor-pointer"
-              label="Drop your audio here"
-              description=".WAV, .MP3 (Max 10MB)"
-              :highlight="true"
-              color="secondary"
-              accept=".wav,.mp3"
-              @change="handleFileUpload('voice')"
-            />
-            <div v-if="uploadStatus.voice" class="text-sm">
-              <span v-if="uploadStatus.voice === 'uploading'" class="text-blue-600">
-                <UIcon name="line-md:loading-loop" class="inline mr-1" />
-                Uploading...
-              </span>
-              <span v-else-if="uploadStatus.voice === 'success'" class="text-green-600">
-                <UIcon name="line-md:check-circle" class="inline mr-1" />
-                Uploaded successfully
-              </span>
-              <span v-else-if="uploadStatus.voice === 'error'" class="text-red-600">
-                <UIcon name="line-md:close-circle" class="inline mr-1" />
-                Upload failed
-              </span>
+            <div class="flex gap-2 mb-3">
+              <UButton
+                :color="voiceChoice === 'upload' ? 'primary' : 'gray'"
+                variant="soft"
+                size="sm"
+                @click="voiceChoice = 'upload'"
+              >
+                Upload Voice
+              </UButton>
+              <UButton
+                :color="voiceChoice === 'existing' ? 'primary' : 'gray'"
+                variant="soft"
+                size="sm"
+                @click="voiceChoice = 'existing'"
+              >
+                Use Existing Voice
+              </UButton>
+            </div>
+            
+            <div v-if="voiceChoice === 'upload'">
+              <UFileUpload
+                v-model="uploadData.voiceFile"
+                class="w-full h-50 hover:cursor-pointer"
+                label="Drop your audio here"
+                description=".WAV, .MP3 (Max 10MB)"
+                :highlight="true"
+                color="secondary"
+                accept=".wav,.mp3"
+                @change="handleFileUpload('voice')"
+              />
+              <div v-if="uploadStatus.voice" class="text-sm">
+                <span v-if="uploadStatus.voice === 'uploading'" class="text-blue-600">
+                  <UIcon name="line-md:loading-loop" class="inline mr-1" />
+                  Uploading...
+                </span>
+                <span v-else-if="uploadStatus.voice === 'success'" class="text-green-600">
+                  <UIcon name="line-md:check-circle" class="inline mr-1" />
+                  Uploaded successfully
+                </span>
+                <span v-else-if="uploadStatus.voice === 'error'" class="text-red-600">
+                  <UIcon name="line-md:close-circle" class="inline mr-1" />
+                  Upload failed
+                </span>
+              </div>
+            </div>
+            
+            <div v-else class="text-center py-8 text-gray-500 dark:text-gray-400">
+              <UIcon name="ic:outline-check-circle" class="size-8 mx-auto mb-2 text-green-500" />
+              <p class="text-sm">Using existing voice ID: 7649e9a20ba74165aa6b7873cd95e303</p>
             </div>
           </div>
         </UCard>
@@ -147,16 +173,23 @@ interface Props {
   uploadStatus: UploadStatus
   canProceed: boolean
   isProcessing: boolean
+  voiceChoice: 'upload' | 'existing'
 }
 
 interface Emits {
   (e: 'next'): void
   (e: 'upload', type: keyof UploadStatus): void
   (e: 'update:uploadData', value: UploadData): void
+  (e: 'update:voiceChoice', value: 'upload' | 'existing'): void
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
+
+const voiceChoice = computed({
+  get: () => props.voiceChoice,
+  set: (value: 'upload' | 'existing') => emit('update:voiceChoice', value)
+})
 
 const handleFileUpload = (type: keyof UploadStatus) => {
   emit('upload', type)

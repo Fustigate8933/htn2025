@@ -14,6 +14,7 @@
         <UploadStep
           v-if="currentStep === 0"
           v-model:upload-data="uploadData"
+          v-model:voice-choice="voiceChoice"
           :upload-status="uploadStatus"
           :can-proceed="canProceedToNextStep"
           :is-processing="isProcessing"
@@ -59,6 +60,7 @@ const {
   hasCameraAccess,
   uploadData,
   uploadStatus,
+  voiceChoice,
   generationOptions,
   generationProgress,
   generationResults,

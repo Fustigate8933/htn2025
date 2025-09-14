@@ -19,26 +19,35 @@ gcs = GCSClient()
 async def generate_presentation(
     ppt_blob: str = Body(...),
     face_blob: str = Body(...),
-    voice_blob: str = Body(...),
+    voice_blob: str = Body(None),
+    voice_id: str = Body(None),
+    voice_choice: str = Body("upload"),
     style: str = Body("professional")
 ):
     """
     Generate a complete presentation with slides and avatar videos
     """
-    print(f"Processing files: ppt={ppt_blob}, face={face_blob}, voice={voice_blob}, style={style}")
+    print(f"Processing files: ppt={ppt_blob}, face={face_blob}, voice_choice={voice_choice}, style={style}")
     
     try:
         # Create temporary files for downloaded content
         ppt_temp = tempfile.NamedTemporaryFile(delete=False, suffix=".pptx")
         face_temp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
-        voice_temp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
 
         # Download files from GCS
         gcs.download_file(ppt_blob, ppt_temp.name)
-
         gcs.download_file(face_blob, face_temp.name)
 
-        gcs.download_file(voice_blob, voice_temp.name)
+        # Handle voice based on choice
+        if voice_choice == "upload" and voice_blob:
+            voice_temp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+            gcs.download_file(voice_blob, voice_temp.name)
+            voice_path = voice_temp.name
+        elif voice_choice == "existing" and voice_id:
+            # Use existing voice ID directly
+            voice_path = voice_id
+        else:
+            raise HTTPException(status_code=400, detail="Invalid voice configuration")
 
         # scripts = ["this is a", "this is b", "this is c", "this is d"]
         speech_results = file_to_speech_processor.file_to_speech(ppt_temp.name)
@@ -61,13 +70,30 @@ async def generate_presentation(
         print(f"Processed {len(slides_data)} slides with scripts")
 
         # Generate avatar videos using gen_video_batch
-
         video_urls = gen_video_batch(
-            audio_path=voice_temp.name,
+            audio_path=voice_path,
             video_path=face_temp.name,
             tts_text=scripts
         )
-        print(video_urls)
+        print(f"Generated {len(video_urls)} videos")
+
+        # Clean up temporary files
+        try:
+            os.unlink(ppt_temp.name)
+            os.unlink(face_temp.name)
+            if voice_choice == "upload" and voice_blob:
+                os.unlink(voice_path)
+        except:
+            pass
+
+        return {
+            "success": True,
+            "presentation": {
+                "slides": slides_data,
+                "scripts": scripts,
+                "video_urls": video_urls
+            }
+        }
     except Exception as e:
         print(f"Error in presentation generation: {str(e)}")
         import traceback

@@ -68,6 +68,8 @@ export const useWorkflow = () => {
     voice: 'idle'
   })
 
+  const voiceChoice = ref<'upload' | 'existing'>('upload')
+
   const uploadedFiles = ref({
     ppt: { blob: '', url: '' },
     face: { blob: '', url: '' },
@@ -104,9 +106,10 @@ export const useWorkflow = () => {
   // Computed
   const canProceedToNextStep = computed(() => {
     if (currentStep.value === 0) {
-      return uploadStatus.value.ppt === 'success' && 
-             uploadStatus.value.face === 'success' && 
-             uploadStatus.value.voice === 'success'
+      const pptValid = uploadStatus.value.ppt === 'success'
+      const faceValid = uploadStatus.value.face === 'success'
+      const voiceValid = voiceChoice.value === 'existing' || uploadStatus.value.voice === 'success'
+      return pptValid && faceValid && voiceValid
     }
     return true
   })
@@ -186,7 +189,9 @@ export const useWorkflow = () => {
       console.log('Files being sent:', {
         ppt_blob: uploadedFiles.value.ppt.blob,
         face_blob: uploadedFiles.value.face.blob,
-        voice_blob: uploadedFiles.value.voice.blob,
+        voice_blob: voiceChoice.value === 'upload' ? uploadedFiles.value.voice.blob : null,
+        voice_id: voiceChoice.value === 'existing' ? '7649e9a20ba74165aa6b7873cd95e303' : null,
+        voice_choice: voiceChoice.value,
         style: generationOptions.value.style
       })
       const response = await $fetch('/api/generate/presentation', {
@@ -194,7 +199,9 @@ export const useWorkflow = () => {
         body: {
           ppt_blob: uploadedFiles.value.ppt.blob,
           face_blob: uploadedFiles.value.face.blob,
-          voice_blob: uploadedFiles.value.voice.blob,
+          voice_blob: voiceChoice.value === 'upload' ? uploadedFiles.value.voice.blob : null,
+          voice_id: voiceChoice.value === 'existing' ? '7649e9a20ba74165aa6b7873cd95e303' : null,
+          voice_choice: voiceChoice.value,
           style: generationOptions.value.style
         }
       }) as { 
@@ -310,6 +317,7 @@ export const useWorkflow = () => {
     uploadData,
     uploadStatus,
     uploadedFiles,
+    voiceChoice,
     generationOptions,
     generationProgress,
     generationResults,

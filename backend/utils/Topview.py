@@ -144,13 +144,20 @@ def gen_video(audio_path: str, video_path: str, tts_text: str):
 
 
 def gen_video_batch(audio_path: str, video_path: str, tts_text: List[str]):
-    origin_file_id = upload_file(audio_path)
-    print(origin_file_id)
+    # Check if audio_path is a file path or an existing voice ID
+    if audio_path.startswith('/') or audio_path.endswith(('.mp3', '.wav', '.m4a')):
+        # It's a file path, upload and clone voice
+        origin_file_id = upload_file(audio_path)
+        print(f"Uploaded voice file: {origin_file_id}")
 
-    task_id = submit_voice_clone(origin_file_id)
-    print(task_id)
-    voice_id = query_voice_clone(task_id)
-    print(voice_id)
+        task_id = submit_voice_clone(origin_file_id)
+        print(f"Voice clone task: {task_id}")
+        voice_id = query_voice_clone(task_id)
+        print(f"Generated voice ID: {voice_id}")
+    else:
+        # It's an existing voice ID, use it directly
+        voice_id = audio_path
+        print(f"Using existing voice ID: {voice_id}")
 
     video_file_id = upload_file(video_path)
     out = [] 
